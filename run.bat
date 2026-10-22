@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title Amazing Assistant Online
+title Amazing Assistants Online
 
 set "PY="
 where py >nul 2>nul && set "PY=py -3"
@@ -30,11 +30,12 @@ if not exist .venv\Scripts\python.exe (
 
 .venv\Scripts\python.exe -m pip install --quiet --disable-pip-version-check -r requirements.txt
 if errorlevel 1 (
-  echo  Could not install Flask. Check your internet connection and try again.
+  echo  Could not install the site. Check your internet connection and try again.
   pause
   exit /b 1
 )
 
-set "HANAP_OPEN_BROWSER=1"
+set "AAO_PORT=5070"
+set "AAO_OPEN_BROWSER=1"
 .venv\Scripts\python.exe app.py
 pause
