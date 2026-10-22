@@ -1,0 +1,43 @@
+<script>if(location.protocol==="file:"){document.documentElement.hidden=true;fetch("http://127.0.0.1:5050/",{mode:"no-cors"}).then(function(){location.replace("http://127.0.0.1:5050/jobs")},function(){document.open();document.write('<meta charset="utf-8"><title>Amazing Assistant Online</title><body style="font:16px/1.6 system-ui,sans-serif;max-width:580px;margin:80px auto;padding:0 24px;color:#0c2e5c"><h1 style="font-size:26px">The site is not running yet</h1><p>This file is one piece of the website and cannot be opened on its own.</p><p>Open the <b>Amazing-Assistant-Online</b> folder and double-click <b>run.bat</b> (Windows) or <b>run.command</b> (Mac). The site opens in your browser by itself. Keep the black window open while you use it.</p><p>Already running? Go to <a href="http://127.0.0.1:5050/">http://127.0.0.1:5050</a>.</p></body>');document.close();document.documentElement.hidden=false})}</script>
+{% extends "base.html" %}
+{% from "macros.html" import ticket with context %}
+{% block title %}Open jobs — Amazing Assistant Online{% endblock %}
+{% block content %}
+<header class="page-head">
+  <p class="eyebrow">The board</p>
+  <h1>Open jobs</h1>
+  <p class="lede">Every open role a client has posted. Filter by the kind of work, or by how it pays.</p>
+</header>
+<form class="filters" method="get" action="{{ url_for('jobs') }}">
+  <label class="field">
+    Search
+    <input type="search" name="q" value="{{ q }}" placeholder="Title, skill, or company">
+  </label>
+  <label class="field">
+    Category
+    <select name="category">
+      <option value="">All</option>
+      {% for item in categories %}
+        <option value="{{ item }}" {% if category == item %}selected{% endif %}>{{ item }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="field">
+    Pay
+    <select name="budget_type">
+      <option value="">All</option>
+      {% for item in budget_types %}
+        <option value="{{ item }}" {% if budget_type == item %}selected{% endif %}>{{ budget_labels[item] }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="btn" type="submit">Filter</button>
+</form>
+<div class="job-grid">
+  {% for job in jobs %}
+    {{ ticket(job) }}
+  {% else %}
+    <p class="empty">No roles match that filter. <a href="{{ url_for('jobs') }}">Clear it</a>.</p>
+  {% endfor %}
+</div>
+{% endblock %}

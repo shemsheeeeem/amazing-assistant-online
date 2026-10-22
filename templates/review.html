@@ -1,0 +1,64 @@
+<script>if(location.protocol==="file:"){document.documentElement.hidden=true;fetch("http://127.0.0.1:5050/",{mode:"no-cors"}).then(function(){location.replace("http://127.0.0.1:5050/dashboard")},function(){document.open();document.write('<meta charset="utf-8"><title>Amazing Assistant Online</title><body style="font:16px/1.6 system-ui,sans-serif;max-width:580px;margin:80px auto;padding:0 24px;color:#0c2e5c"><h1 style="font-size:26px">The site is not running yet</h1><p>This file is one piece of the website and cannot be opened on its own.</p><p>Open the <b>Amazing-Assistant-Online</b> folder and double-click <b>run.bat</b> (Windows) or <b>run.command</b> (Mac). The site opens in your browser by itself. Keep the black window open while you use it.</p><p>Already running? Go to <a href="http://127.0.0.1:5050/">http://127.0.0.1:5050</a>.</p></body>');document.close();document.documentElement.hidden=false})}</script>
+{% extends "base.html" %}
+{% from "macros.html" import rating_line, review_form with context %}
+{% block title %}Applications — {{ job.title }} — Amazing Assistant Online{% endblock %}
+{% block content %}
+<header class="page-head">
+  <p class="eyebrow"><span class="badge badge-{{ job.status }}">{{ status_labels[job.status] }}</span> {{ job.applicant_count }} applied</p>
+  <h1>{{ job.title }}</h1>
+  <p class="lede">{{ money(job.budget_amount, job.budget_type, job.currency) }} · <a href="{{ url_for('job_detail', job_id=job.id) }}">View the public post</a></p>
+</header>
+<form method="post" action="{{ url_for('set_job_status', job_id=job.id) }}" style="margin-bottom:18px">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <input type="hidden" name="status" value="{{ 'open' if job.status == 'closed' else 'closed' }}">
+  <button class="btn btn-ghost" type="submit">{{ 'Reopen role' if job.status == 'closed' else 'Close role' }}</button>
+</form>
+<div class="stack">
+  {% for application in applications %}
+    <article class="app-card hero-ticket">
+      <p class="ticket-kicker">
+        <span>{{ application.location or "Remote" }}</span>
+        <span class="badge badge-{{ application.status }}">{{ status_labels[application.status] }}</span>
+      </p>
+      <h2 style="margin-top:12px"><a href="{{ url_for('person', user_id=application.freelancer_user_id) }}">{{ application.name }}</a></h2>
+      {% if application.headline %}<p class="muted">{{ application.headline }}</p>{% endif %}
+      <p style="margin-top:6px"><a href="{{ url_for('person', user_id=application.freelancer_user_id) }}#reviews">{{ rating_line(application.rating_avg, application.rating_count) }}</a></p>
+      <p class="price">{{ money(application.proposed_rate, job.budget_type, job.currency) }}</p>
+      <p class="muted">{{ application.location or 'Location not set' }} · <a href="mailto:{{ application.email }}">{{ application.email }}</a> · {{ posted(application.created_at) }}</p>
+      {% if skills_list(application.skills) %}
+        <div class="skills">
+          {% for skill in skills_list(application.skills) %}
+            <span class="skill">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if application.start_date or application.hours_per_week or application.work_link %}
+        <dl class="apply-brief app-facts">
+          {% if application.start_date %}<div><dt>Can start</dt><dd>{{ application.start_date }}</dd></div>{% endif %}
+          {% if application.hours_per_week %}<div><dt>Hours</dt><dd>{{ hours_options.get(application.hours_per_week, application.hours_per_week) }}</dd></div>{% endif %}
+          {% if application.work_link %}<div><dt>Work sample</dt><dd><a href="{{ application.work_link }}" target="_blank" rel="noopener nofollow">{{ link_label(application.work_link) }} ↗</a></dd></div>{% endif %}
+        </dl>
+      {% endif %}
+      <p class="cover">{{ application.cover_letter }}</p>
+      <form class="status-row" method="post" action="{{ url_for('set_application_status', application_id=application.id) }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="job_id" value="{{ job.id }}">
+        {% for key in ['pending', 'shortlisted', 'hired', 'declined'] %}
+          <button class="chip {% if application.status == key %}is-on{% endif %}" type="submit" name="status" value="{{ key }}" {% if application.status == key %}disabled{% endif %}>
+            {{ status_labels[key] }}
+          </button>
+        {% endfor %}
+      </form>
+      {% if application.status == 'hired' %}
+        {% if application.reviewed %}
+          <p class="review-done">✓ You reviewed {{ application.name.split()[0] }}. <a href="{{ url_for('person', user_id=application.freelancer_user_id) }}#reviews">See it on their profile</a></p>
+        {% else %}
+          {{ review_form(application.id, application.name.split()[0], request.path) }}
+        {% endif %}
+      {% endif %}
+    </article>
+  {% else %}
+    <p class="empty">No one has applied yet. The role stays on the board while it is open.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,299 @@
+<script>if(location.protocol==="file:"){document.documentElement.hidden=true;fetch("http://127.0.0.1:5050/",{mode:"no-cors"}).then(function(){location.replace("http://127.0.0.1:5050/")},function(){document.open();document.write('<meta charset="utf-8"><title>Amazing Assistant Online</title><body style="font:16px/1.6 system-ui,sans-serif;max-width:580px;margin:80px auto;padding:0 24px;color:#0c2e5c"><h1 style="font-size:26px">The site is not running yet</h1><p>This file is one piece of the website and cannot be opened on its own.</p><p>Open the <b>Amazing-Assistant-Online</b> folder and double-click <b>run.bat</b> (Windows) or <b>run.command</b> (Mac). The site opens in your browser by itself. Keep the black window open while you use it.</p><p>Already running? Go to <a href="http://127.0.0.1:5050/">http://127.0.0.1:5050</a>.</p></body>');document.close();document.documentElement.hidden=false})}</script>
+{% extends "base.html" %}
+{% from "macros.html" import company_mark, review_card, category_grid, pricing_plans with context %}
+{% block title %}Amazing Assistant Online — Hire help or find work in one place{% endblock %}
+{% block body_class %}is-home{% endblock %}
+{% block page %}
+{% set category_icons = {'Design': '🎨', 'Development': '💻', 'Writing': '✍️', 'Marketing': '📣', 'Admin': '🗂️', 'Video': '🎬', 'Customer support': '🎧', 'AI services': '✨', 'Finance & accounting': '🏦', 'Legal': '⚖️'} %}
+
+<section class="lp-hero">
+  <svg class="lp-doodle lp-d1" viewBox="0 0 80 80" aria-hidden="true">
+    <defs><clipPath id="lp-c1"><circle cx="40" cy="40" r="34"/></clipPath></defs>
+    <g clip-path="url(#lp-c1)" stroke="#2563c9" stroke-width="5">
+      <path d="M-10 14h100M-10 28h100M-10 42h100M-10 56h100M-10 70h100"/>
+    </g>
+  </svg>
+  <svg class="lp-doodle lp-d2" viewBox="0 0 120 40" aria-hidden="true">
+    <path d="M4 30c12-24 22-24 30 0s18 24 30 0 20-24 30 0 14 18 22 4" fill="none" stroke="#d4a017" stroke-width="6" stroke-linecap="round"/>
+  </svg>
+  <svg class="lp-doodle lp-d3" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="#0b2545">
+      <circle cx="10" cy="10" r="5"/><circle cx="35" cy="10" r="5"/><circle cx="60" cy="10" r="5"/>
+      <circle cx="10" cy="35" r="5"/><circle cx="35" cy="35" r="5"/><circle cx="60" cy="35" r="5"/>
+      <circle cx="10" cy="60" r="5"/><circle cx="35" cy="60" r="5"/><circle cx="60" cy="60" r="5"/>
+    </g>
+  </svg>
+  <svg class="lp-doodle lp-d4" viewBox="0 0 80 80" aria-hidden="true">
+    <path d="M40 6l8 24h26l-21 15 8 25-21-15-21 15 8-25L6 30h26z" fill="#f2c94c"/>
+  </svg>
+  <svg class="lp-doodle lp-d5" viewBox="0 0 100 60" aria-hidden="true">
+    <path d="M6 54L28 8l22 46L72 8l22 46" fill="none" stroke="#5aa2e8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+
+  <div class="wrap lp-hero-inner">
+    <p class="lp-badge"><span aria-hidden="true">📌</span> {{ open_count }} open job{{ '' if open_count == 1 else 's' }} on the board right now</p>
+    <h1>Hire help or find work <span class="lp-scribble">in one place<svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 16C60 6 130 4 296 10M20 21c80-8 170-9 250-6" fill="none" stroke="#d4a017" stroke-width="5" stroke-linecap="round"/></svg></span></h1>
+    <p class="lp-lede">Clients post a job and read every application from one dashboard. Freelancers apply with a short letter and their rate. Hourly, monthly, or by the project, in dollars or pesos.</p>
+    <div class="lp-actions">
+      {% if user and user.role == 'client' %}
+        <a class="lp-btn" href="{{ url_for('new_job') }}">Post a job <span aria-hidden="true">→</span></a>
+      {% elif user %}
+        <a class="lp-btn" href="{{ url_for('jobs') }}">Find work <span aria-hidden="true">→</span></a>
+      {% else %}
+        <a class="lp-btn" href="{{ url_for('signup') }}">Get started <span aria-hidden="true">→</span></a>
+      {% endif %}
+      <a class="lp-btn lp-btn-soft" href="{{ url_for('jobs') }}">Browse jobs</a>
+    </div>
+    <p class="lp-free">Posting and applying are free.</p>
+
+    {% if freelancers %}
+    <div class="lp-proof">
+      <span class="lp-faces" aria-hidden="true">
+        {% for person in freelancers %}<span class="lp-face lp-face-{{ loop.index }}">{{ person.name[:1]|upper }}</span>{% endfor %}
+      </span>
+      <span><strong>{{ freelancer_count }} freelancer{{ '' if freelancer_count == 1 else 's' }}</strong> ready to apply and <strong>{{ client_count }} client{{ '' if client_count == 1 else 's' }}</strong> hiring</span>
+    </div>
+    {% endif %}
+
+    <div class="lp-cats">
+      <span>Hiring across</span>
+      {% for category in categories %}
+        <a href="{{ url_for('jobs', category=category) }}"><span aria-hidden="true">{{ category_icons.get(category, '•') }}</span> {{ category }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="lp-app" aria-label="Preview of the client dashboard">
+      <div class="lp-app-bar">
+        <i></i><i></i><i></i>
+        <span>amazingassistant.online/dashboard</span>
+      </div>
+      <div class="lp-app-body">
+        <aside class="lp-app-side" aria-hidden="true">
+          <span class="lp-app-logo"><span class="logo-mark"></span> AAO</span>
+          <span class="is-on">▦ Dashboard</span>
+          <span>✎ My jobs</span>
+          <span>☺ Applicants</span>
+          <span>⚙ Profile</span>
+        </aside>
+        <div class="lp-app-main">
+          <div class="lp-app-head">
+            <strong>Open jobs</strong>
+            <span class="lp-app-stats">
+              <span><b>{{ open_count }}</b> open</span>
+              <span><b>{{ application_count }}</b> applications</span>
+            </span>
+          </div>
+          <div class="lp-app-table">
+            <div class="lp-app-row lp-app-th" aria-hidden="true">
+              <span>Job</span><span>Pay</span><span>Applied</span><span>Status</span>
+            </div>
+            {% for job in jobs[:4] %}
+              <a class="lp-app-row" href="{{ url_for('job_detail', job_id=job.id) }}">
+                <span class="lp-app-job">
+                  {{ company_mark(job.client_company or job.client_name, job.category) }}
+                  <span><strong>{{ job.title }}</strong><em>{{ job.client_company or job.client_name }}</em></span>
+                </span>
+                <span>{{ money(job.budget_amount, job.budget_type, job.currency) }}</span>
+                <span>{{ job.applicant_count }}</span>
+                <span><span class="badge badge-open">Open</span></span>
+              </a>
+            {% else %}
+              <p class="lp-app-empty">The first job posted shows up here.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-section" id="how">
+  <div class="wrap">
+    <header class="lp-intro">
+      <h2>How it works in 3 simple steps</h2>
+      <p>From posting to hiring, everything happens in one place.</p>
+    </header>
+    <ol class="lp-steps" aria-hidden="true">
+      <li>1</li><li>2</li><li>3</li>
+    </ol>
+    <div class="lp-cards">
+      <article class="lp-card">
+        <span class="lp-icon lp-icon-blue" aria-hidden="true">📝</span>
+        <h3>Post your job</h3>
+        <p>Write what you need, add skills, and choose hourly, monthly, or fixed pay in USD or PHP.</p>
+        <a class="lp-outline" href="{{ url_for('signup', role='client') }}">Post a job</a>
+      </article>
+      <article class="lp-card">
+        <span class="lp-icon lp-icon-gold" aria-hidden="true">✉️</span>
+        <h3>Get applications</h3>
+        <p>Freelancers apply with a letter written for your job and the rate they want.</p>
+        <a class="lp-outline" href="{{ url_for('jobs') }}">See open jobs</a>
+      </article>
+      <article class="lp-card">
+        <span class="lp-icon lp-icon-navy" aria-hidden="true">✅</span>
+        <h3>Hire the right person</h3>
+        <p>Shortlist, hire, or decline from your dashboard. Applicants see the change right away.</p>
+        <a class="lp-outline" href="{{ url_for('dashboard') if user else url_for('signup') }}">Open dashboard</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="lp-section lp-cats-section">
+  <div class="wrap">
+    <header class="lp-intro">
+      <h2>Find freelancers for every type of work</h2>
+      <p>Pick a category to see who's hiring right now.</p>
+    </header>
+    {{ category_grid(categories, category_counts) }}
+  </div>
+</section>
+
+<section class="lp-band">
+  <div class="wrap lp-band-grid">
+    <div class="lp-band-copy">
+      <p class="lp-kicker">Just a few quick steps</p>
+      <h2>Post a job in about two minutes</h2>
+      <p>Give it a title, a category, and a budget. Add the skills you need. Your job goes live on the board as soon as you publish.</p>
+      <ul class="lp-checks">
+        <li>Seven categories, from design to customer support</li>
+        <li>Close a job when you're done, reopen it any time</li>
+        <li>Every applicant's letter and rate in one list</li>
+      </ul>
+      <a class="lp-btn" href="{{ url_for('new_job') if user and user.role == 'client' else url_for('signup', role='client') }}">Post a job <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="lp-form-mock" aria-hidden="true">
+      <div class="lp-stepper">
+        <span class="is-done">Details</span>
+        <span class="is-on">Budget</span>
+        <span>Skills</span>
+        <span>Publish</span>
+      </div>
+      <div class="lp-mock-field">
+        <small>Job title</small>
+        <span>Virtual assistant for inbox and calendar</span>
+      </div>
+      <div class="lp-mock-split">
+        <div class="lp-mock-field">
+          <small>Pay type</small>
+          <span class="lp-seg"><b>Hourly</b><i>Monthly</i><i>Fixed</i></span>
+        </div>
+        <div class="lp-mock-field">
+          <small>Budget</small>
+          <span>$8 / hr · USD</span>
+        </div>
+      </div>
+      <div class="lp-mock-field">
+        <small>Skills</small>
+        <span class="lp-mock-tags"><b>Email</b><b>Calendar</b><b>Google Workspace</b></span>
+      </div>
+      <span class="lp-mock-btn">Continue →</span>
+    </div>
+  </div>
+</section>
+
+<section class="lp-section">
+  <div class="wrap">
+    <header class="lp-intro">
+      <h2>Open jobs on the board</h2>
+      <p>Real work from studios, small businesses, and growing teams.</p>
+    </header>
+    <div class="lp-tools">
+      {% for job in jobs %}
+        <a class="lp-tool" href="{{ url_for('job_detail', job_id=job.id) }}">
+          <span class="lp-tool-icon" aria-hidden="true">{{ category_icons.get(job.category, '💼') }}</span>
+          <span class="lp-tool-body">
+            <strong>{{ job.title }}</strong>
+            <span>{{ job.client_company or job.client_name }} · {{ job.category }}</span>
+            <em>{{ money(job.budget_amount, job.budget_type, job.currency) }} · {{ job.applicant_count }} applied</em>
+          </span>
+          <span class="lp-tool-go" aria-hidden="true">→</span>
+        </a>
+      {% else %}
+        <p class="empty">No open jobs yet. <a href="{{ url_for('signup', role='client') }}">Post the first one</a>.</p>
+      {% endfor %}
+    </div>
+    <div class="lp-center">
+      <a class="lp-btn" href="{{ url_for('jobs') }}">See all open jobs <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+
+<section class="plans-section">
+  <div class="wrap">
+    <header class="lp-intro">
+      <h2>Choose how you want to hire</h2>
+      <p>Flexible options designed to fit your hiring needs.</p>
+    </header>
+    {{ pricing_plans() }}
+  </div>
+</section>
+
+{% if reviews %}
+<section class="lp-section lp-reviews">
+  <div class="wrap">
+    <header class="lp-intro">
+      <h2>Loved by clients and freelancers</h2>
+      <p>Every review comes from a finished job on the board.</p>
+    </header>
+    <div class="review-grid">
+      {% for item in reviews[:3] %}{{ review_card(item, show_subject=true) }}{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="lp-section lp-faq-wrap">
+  <div class="wrap">
+    <header class="lp-intro">
+      <h2>Frequently asked questions</h2>
+    </header>
+    <div class="lp-faq">
+      <details>
+        <summary>What is Amazing Assistant Online?</summary>
+        <p>A job board for hiring and getting hired. Clients post jobs, freelancers apply with a letter and a rate, and clients pick who gets the work.</p>
+      </details>
+      <details>
+        <summary>Does it cost anything to post or apply?</summary>
+        <p>No. Posting a job and applying to one are both free.</p>
+      </details>
+      <details>
+        <summary>How do I choose between applicants?</summary>
+        <p>Open the job from your dashboard to read each letter and rate. Mark people as shortlisted, hired, or declined, and they see the update on their side.</p>
+      </details>
+      <details>
+        <summary>Can I pay by the hour, by the month, or per project?</summary>
+        <p>Yes. Every job is hourly, monthly, or fixed price, in US dollars or Philippine pesos.</p>
+      </details>
+      <details>
+        <summary>How do reviews work?</summary>
+        <p>Once a client marks someone as hired, both sides can leave one review with a 1 to 5 star rating and a short note. Reviews show on each person's profile with their average rating.</p>
+      </details>
+      <details>
+        <summary>Can one account both hire and apply?</summary>
+        <p>Each account is either a client or a freelancer. If you do both, create a second account with a different email.</p>
+      </details>
+      <details>
+        <summary>What happens when I've hired someone?</summary>
+        <p>Close the job from your dashboard so it leaves the board. You can reopen it later if you need more help.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="lp-cta">
+  <div class="wrap lp-cta-inner">
+    <svg class="lp-doodle lp-d6" viewBox="0 0 120 40" aria-hidden="true">
+      <path d="M4 30c12-24 22-24 30 0s18 24 30 0 20-24 30 0 14 18 22 4" fill="none" stroke="#d4a017" stroke-width="6" stroke-linecap="round"/>
+    </svg>
+    <h2>Ready when you are</h2>
+    <p>Sign up as the person hiring, or as the person who wants the work.</p>
+    <div class="lp-actions">
+      <a class="lp-btn lp-btn-gold" href="{{ url_for('signup', role='client') }}">I'm hiring <span aria-hidden="true">→</span></a>
+      <a class="lp-btn lp-btn-line" href="{{ url_for('signup', role='freelancer') }}">I'm looking for work</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

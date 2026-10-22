@@ -1,0 +1,133 @@
+{% macro company_mark(name, category) %}
+{% set tones = {'Design': 'blue', 'Development': 'navy', 'Writing': 'gold', 'Marketing': 'sky', 'Admin': 'gold', 'Video': 'navy', 'Customer support': 'sky'} %}
+<span class="mark mark-{{ tones.get(category, 'blue') }}" aria-hidden="true">{{ (name or '?')[:1]|upper }}</span>
+{% endmacro %}
+
+{% macro category_icon(name) %}
+{% set paths = {
+  'Design': 'M12 3a9 9 0 100 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 005-5c0-4-4-7.6-9-7.6zM7.5 12h.01M9.5 8h.01M14.5 8h.01M16.5 11.5h.01',
+  'Development': 'M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16',
+  'Writing': 'M4 20l4.5-1L19 8.5 15.5 5 5 15.5 4 20zM13.5 7l3.5 3.5',
+  'Marketing': 'M4 10v4h3l7 4V6l-7 4H4zM17.5 9a4 4 0 010 6M7 14l1 5h2.5',
+  'Admin': 'M9 4h6v3H9zM7 5.5H5.5V21h13V5.5H17M9 11h6M9 15h6',
+  'Video': 'M3 6.5h12v11H3zM15 10.5l6-3.5v10l-6-3.5',
+  'Customer support': 'M4 15v-3a8 8 0 0116 0v3M4 14h3v5H4zM17 14h3v5h-3zM20 19c0 1.5-2 2-5 2',
+  'AI services': 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18.5 15l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z',
+  'Finance & accounting': 'M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20.5h18',
+  'Legal': 'M12 4v16M8 20.5h8M5 7.5h14M5 7.5L2.5 13a2.5 2.5 0 005 0zM19 7.5L16.5 13a2.5 2.5 0 005 0z',
+} %}
+<svg class="cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ paths.get(name, 'M4 7h16v12H4zM9 7V5h6v2') }}"/></svg>
+{% endmacro %}
+
+{% macro category_grid(categories, counts) %}
+<div class="cat-grid">
+  {% for category in categories %}
+    {% set n = counts.get(category, 0) %}
+    <a class="cat-tile" href="{{ url_for('jobs', category=category) }}">
+      {{ category_icon(category) }}
+      <span class="cat-name">{{ category }}</span>
+      <span class="cat-count">{{ n }} open job{{ '' if n == 1 else 's' }}</span>
+    </a>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro pricing_plans() %}
+<div class="plans">
+  <article class="plan">
+    <h3>Basic</h3>
+    <p class="plan-for">For occasional hiring and one-off projects</p>
+    <p class="plan-price"><strong>Free</strong></p>
+    <p class="plan-desc">Post a job, read every application, and hire without long-term commitments or extra overhead.</p>
+    <p class="plan-includes">Basic includes:</p>
+    <ul class="plan-list">
+      <li><strong>Unlimited job posts</strong> — hourly, monthly, or fixed price</li>
+      <li><strong>Freelancer profiles</strong> — skills, rates, ratings, and reviews</li>
+      <li><strong>One dashboard</strong> — every letter and rate in one list</li>
+      <li><strong>Clear decisions</strong> — shortlist, hire, or decline in a click</li>
+      <li><strong>Two currencies</strong> — pay in US dollars or Philippine pesos</li>
+    </ul>
+    <a class="plan-btn plan-btn-line" href="{{ url_for('signup', role='client') }}">Get started for free</a>
+  </article>
+  <article class="plan plan-plus">
+    <span class="plan-badge">Coming soon</span>
+    <h3>Business Plus</h3>
+    <p class="plan-for">For ongoing work, repeat hiring, and teams</p>
+    <p class="plan-price"><strong>Soon</strong></p>
+    <p class="plan-desc">Extra tools for teams that hire every month and want the right people faster.</p>
+    <p class="plan-includes">Everything in Basic, plus:</p>
+    <ul class="plan-list">
+      <li><strong>Curated shortlists</strong> — we surface top matches so you can hire faster</li>
+      <li><strong>Verified freelancers</strong> — identity and portfolio checks</li>
+      <li><strong>Team workspace</strong> — shared hiring with roles and permissions</li>
+      <li><strong>Centralized billing</strong> — keep team spend in one place</li>
+      <li><strong>Priority support</strong> — faster help to keep projects moving</li>
+    </ul>
+    <a class="plan-btn" href="{{ url_for('signup', role='client') }}">Start free with Basic</a>
+  </article>
+</div>
+{% endmacro %}
+
+{% macro stars(rating) %}
+<span class="stars" role="img" aria-label="{{ '%.1f'|format(rating or 0) }} out of 5 stars">{% for i in range(1, 6) %}<span class="{{ 'on' if (rating or 0) >= i - 0.25 else '' }}" aria-hidden="true">★</span>{% endfor %}</span>
+{% endmacro %}
+
+{% macro rating_line(avg, count) %}
+{% if count %}
+<span class="rating-line">{{ stars(avg) }} <strong>{{ '%.1f'|format(avg) }}</strong> <span class="muted">({{ count }} review{{ '' if count == 1 else 's' }})</span></span>
+{% else %}
+<span class="rating-line muted">No reviews yet</span>
+{% endif %}
+{% endmacro %}
+
+{% macro review_form(application_id, subject_name, back) %}
+<form class="review-form" method="post" action="{{ url_for('leave_review', application_id=application_id) }}">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <input type="hidden" name="back" value="{{ back }}">
+  <p class="review-form-title">Review {{ subject_name }}</p>
+  <fieldset class="star-pick">
+    <legend class="sr-only">Rating</legend>
+    {% for value in [5, 4, 3, 2, 1] %}
+      <input type="radio" id="star-{{ application_id }}-{{ value }}" name="rating" value="{{ value }}" required>
+      <label for="star-{{ application_id }}-{{ value }}" title="{{ value }} star{{ '' if value == 1 else 's' }}">★<span class="sr-only">{{ value }} star{{ '' if value == 1 else 's' }}</span></label>
+    {% endfor %}
+  </fieldset>
+  <textarea name="body" rows="3" minlength="10" maxlength="1000" required placeholder="How did it go? What should others know?"></textarea>
+  <button class="btn btn-small" type="submit">Post review</button>
+</form>
+{% endmacro %}
+
+{% macro review_card(review, show_subject=false) %}
+<article class="review-card">
+  <div class="review-top">
+    {{ stars(review.rating) }}
+    <span class="muted">{{ posted(review.created_at) }}</span>
+  </div>
+  <p class="review-body">“{{ review.body }}”</p>
+  <p class="review-by">
+    <span class="avatar avatar-sm" aria-hidden="true">{{ review.author_name[:1]|upper }}</span>
+    <span>
+      <a href="{{ url_for('person', user_id=review.author_id) }}"><strong>{{ review.author_name }}</strong></a>{% if review.author_company %}, {{ review.author_company }}{% endif %}
+      <span class="muted">
+        {% if show_subject %}on <a href="{{ url_for('person', user_id=review.subject_id) }}">{{ review.subject_name }}</a> · {% endif %}{{ review.job_title }}
+      </span>
+    </span>
+  </p>
+</article>
+{% endmacro %}
+
+{% macro ticket(job) %}
+<a class="job-card" href="{{ url_for('job_detail', job_id=job.id) }}">
+  <span class="job-card-top">
+    <span>
+      <span class="job-card-title">{{ job.title }}</span>
+      <span class="job-card-co">{{ job.client_company or job.client_name }}</span>
+    </span>
+    {{ company_mark(job.client_company or job.client_name, job.category) }}
+  </span>
+  <span class="job-card-bottom">
+    <span>{{ job.location }} · {{ job.applicant_count }} applied</span>
+    <span class="job-card-pay">{{ money(job.budget_amount, job.budget_type, job.currency) }}</span>
+  </span>
+</a>
+{% endmacro %}

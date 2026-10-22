@@ -1,0 +1,120 @@
+<script>if(location.protocol==="file:"){document.documentElement.hidden=true;fetch("http://127.0.0.1:5050/",{mode:"no-cors"}).then(function(){location.replace("http://127.0.0.1:5050/")},function(){document.open();document.write('<meta charset="utf-8"><title>Amazing Assistant Online</title><body style="font:16px/1.6 system-ui,sans-serif;max-width:580px;margin:80px auto;padding:0 24px;color:#0c2e5c"><h1 style="font-size:26px">The site is not running yet</h1><p>This file is one piece of the website and cannot be opened on its own.</p><p>Open the <b>Amazing-Assistant-Online</b> folder and double-click <b>run.bat</b> (Windows) or <b>run.command</b> (Mac). The site opens in your browser by itself. Keep the black window open while you use it.</p><p>Already running? Go to <a href="http://127.0.0.1:5050/">http://127.0.0.1:5050</a>.</p></body>');document.close();document.documentElement.hidden=false})}</script>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Amazing Assistant Online{% endblock %}</title>
+  <meta name="description" content="Amazing Assistant Online is a marketplace where clients post jobs and freelancers apply.">
+  <meta name="theme-color" content="#0b2545">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  {% if design == 'loop' %}
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  {% elif design == 'care' %}
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  {% else %}
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  {% endif %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=12">
+  {% if design == 'loop' %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='loop.css') }}?v=6">
+  {% elif design == 'care' %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='care.css') }}?v=9">
+  {% endif %}
+</head>
+<body class="design-{{ design }} {% block body_class %}{% endblock %}">
+  <a class="skip" href="#main">Skip to content</a>
+  {% if not user %}
+    <div class="announce">
+      <div class="wrap">
+        <strong>New on Amazing Assistant Online</strong>
+        <p>Clients post jobs for free, and freelancers apply with a letter and a rate. <a href="{{ url_for('signup') }}">Create an account</a></p>
+      </div>
+    </div>
+  {% endif %}
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="logo" href="{{ url_for('home') }}">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>Amazing Assistant <em>Online</em></span>
+      </a>
+      <nav>
+        <a href="{{ url_for('jobs') }}">Jobs</a>
+        {% if user %}
+          <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <form method="post" action="{{ url_for('logout') }}">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <button class="text-btn" type="submit">Log out</button>
+          </form>
+          {% if user.role == 'client' %}
+            <a class="btn btn-small" href="{{ url_for('new_job') }}">Post a job</a>
+          {% endif %}
+        {% else %}
+          <a href="{{ url_for('login') }}">Log in</a>
+          <a class="btn btn-small" href="{{ url_for('signup') }}">Create account</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="wrap flashes">
+          {% for category, message in messages %}
+            <p class="flash flash-{{ category }}" role="status">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block page %}
+      <div class="wrap page">
+        {% block content %}{% endblock %}
+      </div>
+    {% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="wrap foot">
+      <div>
+        <h5>Amazing Assistant Online</h5>
+        <p>A board for hiring and getting hired.<br>Hourly, monthly, or by the project.</p>
+      </div>
+      <div>
+        <h5>Work</h5>
+        <a href="{{ url_for('jobs') }}">Open jobs</a>
+        <a href="{{ url_for('signup', role='freelancer') }}">Find work</a>
+        <a href="{{ url_for('signup', role='client') }}">Post a job</a>
+      </div>
+      <div>
+        <h5>Account</h5>
+        {% if user %}
+          <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+        {% else %}
+          <a href="{{ url_for('login') }}">Log in</a>
+          <a href="{{ url_for('signup') }}">Create account</a>
+        {% endif %}
+      </div>
+      <span class="logo-mark logo-mark-lg" aria-hidden="true"></span>
+    </div>
+    <div class="wrap foot-legal">
+      <p>Accounts live on this computer.</p>
+    </div>
+  </footer>
+  <div class="design-switch" role="group" aria-label="Site design">
+    <span>Design</span>
+    <a href="{{ request.path }}?design=classic" {% if design == 'classic' %}aria-current="true"{% endif %}>Classic</a>
+    <a href="{{ request.path }}?design=loop" {% if design == 'loop' %}aria-current="true"{% endif %}>Loop</a>
+    <a href="{{ request.path }}?design=care" {% if design == 'care' %}aria-current="true"{% endif %}>Care</a>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js" defer></script>
+  <script src="{{ url_for('static', filename='motion.js') }}?v=4" defer></script>
+  {% if design == 'care' %}
+  <script src="{{ url_for('static', filename='care.js') }}?v=1" defer></script>
+  {% endif %}
+</body>
+</html>

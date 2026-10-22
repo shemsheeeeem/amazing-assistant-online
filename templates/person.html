@@ -1,0 +1,141 @@
+<script>if(location.protocol==="file:"){document.documentElement.hidden=true;fetch("http://127.0.0.1:5050/",{mode:"no-cors"}).then(function(){location.replace("http://127.0.0.1:5050/people/u_andre")},function(){document.open();document.write('<meta charset="utf-8"><title>Amazing Assistant Online</title><body style="font:16px/1.6 system-ui,sans-serif;max-width:580px;margin:80px auto;padding:0 24px;color:#0c2e5c"><h1 style="font-size:26px">The site is not running yet</h1><p>This file is one piece of the website and cannot be opened on its own.</p><p>Open the <b>Amazing-Assistant-Online</b> folder and double-click <b>run.bat</b> (Windows) or <b>run.command</b> (Mac). The site opens in your browser by itself. Keep the black window open while you use it.</p><p>Already running? Go to <a href="http://127.0.0.1:5050/">http://127.0.0.1:5050</a>.</p></body>');document.close();document.documentElement.hidden=false})}</script>
+{% extends "base.html" %}
+{% from "macros.html" import ticket, rating_line, review_card with context %}
+{% block title %}{{ person.name }} — Amazing Assistant Online{% endblock %}
+{% block content %}
+{% set is_freelancer = person.role == 'freelancer' %}
+{% set is_me = user and user.id == person.id %}
+<article class="person-card profile-hero">
+  <span class="avatar avatar-xl">
+    {% if photo_url(person) %}<img src="{{ photo_url(person) }}" alt="{{ person.name }}">{% else %}{{ person.name[:1]|upper }}{% endif %}
+  </span>
+  <div class="profile-intro">
+    <p class="eyebrow">{{ 'Freelancer' if is_freelancer else 'Client' }}{% if person.location %} · {{ person.location }}{% endif %}</p>
+    <h1>{{ person.name }}</h1>
+    {% if person.headline %}<p class="profile-headline">{{ person.headline }}</p>{% endif %}
+    <div class="profile-tags">
+      {% if is_freelancer and person.availability %}
+        <span class="tag tag-{{ 'off' if person.availability == 'unavailable' else 'on' }}">{{ availability_labels.get(person.availability, '') }}</span>
+      {% endif %}
+      {% if person.company %}<span class="tag">{{ person.company }}</span>{% endif %}
+      <a class="tag tag-plain" href="#reviews">{{ rating_line(rating.avg, rating.count) }}</a>
+    </div>
+  </div>
+  <div class="profile-cta">
+    {% if is_freelancer and person.rate %}<p class="price">{{ money(person.rate, 'hourly', 'USD') }}</p>{% endif %}
+    {% if is_me %}
+      <a class="btn" href="{{ url_for('profile') }}">Edit profile</a>
+    {% elif user %}
+      <a class="btn" href="mailto:{{ person.email }}">Contact {{ person.name.split()[0] }}</a>
+    {% else %}
+      <a class="btn" href="{{ url_for('login', next=request.path) }}">Log in to contact</a>
+    {% endif %}
+  </div>
+</article>
+
+<div class="profile-body">
+  <div class="profile-main">
+    <section class="profile-section">
+      <h2>About</h2>
+      {% if person.bio %}<p class="prose">{{ person.bio }}</p>
+      {% else %}<p class="empty">{{ person.name.split()[0] }} has not written an introduction yet.</p>{% endif %}
+    </section>
+
+    {% if is_freelancer %}
+    <section class="profile-section">
+      <h2>Portfolio</h2>
+      {% if portfolio %}
+        <div class="portfolio-grid">
+          {% for item in portfolio %}
+            <article class="portfolio-card">
+              <span class="portfolio-mark" aria-hidden="true">{{ loop.index }}</span>
+              <h3>{% if item.url %}<a href="{{ item.url }}" target="_blank" rel="noopener nofollow">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}</h3>
+              {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+              {% if item.url %}<a class="portfolio-link" href="{{ item.url }}" target="_blank" rel="noopener nofollow">{{ link_label(item.url) }} ↗</a>{% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty">No portfolio projects yet.{% if is_me %} <a href="{{ url_for('profile') }}">Add your first project</a>{% endif %}</p>
+      {% endif %}
+    </section>
+
+    <section class="profile-section">
+      <h2>Certificates and training</h2>
+      {% if certificates %}
+        <ul class="cert-list">
+          {% for item in certificates %}
+            <li>
+              <span class="cert-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15a5 5 0 100-10 5 5 0 000 10zM8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5"/></svg></span>
+              <div>
+                <strong>{{ item.name }}</strong>
+                <span class="muted">{{ item.issuer }}{% if item.issuer and item.year %} · {% endif %}{{ item.year or '' }}</span>
+              </div>
+              {% if item.url %}<a class="cert-link" href="{{ item.url }}" target="_blank" rel="noopener nofollow">View credential ↗</a>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No certificates listed yet.{% if is_me %} <a href="{{ url_for('profile') }}">Add a certificate</a>{% endif %}</p>
+      {% endif %}
+    </section>
+    {% endif %}
+  </div>
+
+  <aside class="profile-aside">
+    <div class="person-card">
+      <h2>Details</h2>
+      <dl class="detail-list">
+        {% if is_freelancer %}
+          {% if person.rate %}<div><dt>Rate</dt><dd>{{ money(person.rate, 'hourly', 'USD') }}</dd></div>{% endif %}
+          {% if person.experience_years is not none %}<div><dt>Experience</dt><dd>{{ person.experience_years }} year{{ '' if person.experience_years == 1 else 's' }}</dd></div>{% endif %}
+          {% if person.availability %}<div><dt>Availability</dt><dd>{{ availability_labels.get(person.availability, '') }}</dd></div>{% endif %}
+        {% else %}
+          {% if person.industry %}<div><dt>Industry</dt><dd>{{ person.industry }}</dd></div>{% endif %}
+          {% if person.company_size %}<div><dt>Team size</dt><dd>{{ person.company_size }}{{ '' if person.company_size == 'Just me' else ' people' }}</dd></div>{% endif %}
+        {% endif %}
+        {% if person.location %}<div><dt>Location</dt><dd>{{ person.location }}</dd></div>{% endif %}
+        {% if person.languages %}<div><dt>Languages</dt><dd>{{ person.languages }}</dd></div>{% endif %}
+        <div><dt>Member since</dt><dd>{{ month_year(person.created_at) }}</dd></div>
+      </dl>
+      {% if is_freelancer and skills_list(person.skills) %}
+        <h3 class="aside-title">Skills</h3>
+        <div class="skills">
+          {% for skill in skills_list(person.skills) %}<span class="skill">{{ skill }}</span>{% endfor %}
+        </div>
+      {% endif %}
+      {% set links = profile_links(person) %}
+      {% if links %}
+        <h3 class="aside-title">Links</h3>
+        <ul class="link-list">
+          {% for label, url in links %}<li><a href="{{ url }}" target="_blank" rel="noopener nofollow">{{ label }} ↗</a></li>{% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+
+{% if jobs %}
+  <div class="section-head" style="margin-top:28px">
+    <h2>Open roles</h2>
+  </div>
+  <div class="job-grid">
+    {% for job in jobs %}
+      {{ ticket(job) }}
+    {% endfor %}
+  </div>
+{% endif %}
+<section id="reviews" class="reviews-section">
+  <div class="section-head">
+    <h2>Reviews</h2>
+    {% if rating.count %}<span class="review-score"><strong>{{ '%.1f'|format(rating.avg) }}</strong> / 5 from {{ rating.count }} review{{ '' if rating.count == 1 else 's' }}</span>{% endif %}
+  </div>
+  {% if reviews %}
+    <div class="review-grid">
+      {% for item in reviews %}{{ review_card(item) }}{% endfor %}
+    </div>
+  {% else %}
+    <p class="empty">No reviews yet. Reviews appear here after {{ person.name.split()[0] }} finishes a job on the board.</p>
+  {% endif %}
+</section>
+{% endblock %}
